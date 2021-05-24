@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import logo from './logo.svg';
+import moment from "moment";
+import copy from 'copy-to-clipboard';
 import './App.css';
 import {
   Header,
@@ -9,15 +11,20 @@ import {
   DatePicker,
   DatePickerInput,
   TextInput,
+  TextArea,
   Select,
   SelectItem,
+  CopyButton,
+  Accordion,
+  AccordionItem,
+  Button,
 } from 'carbon-components-react';
 
 function formatDate(dt: Date): string {
-  var y = dt.getFullYear();
-  var m = ('00' + (dt.getMonth() + 1)).slice(-2);
-  var d = ('00' + dt.getDate()).slice(-2);
-  return (y + '/' + m + '/' + d);
+  return moment(dt).format("YYYY/MM/DD")
+}
+function formatTime(dt: Date): string {
+  return `${moment.utc(dt).format("YYYYMMDDTHHmmss")}Z`
 }
 
 type Game = {
@@ -27,8 +34,11 @@ type Game = {
 }
 function App() {
   const [date, setDate] = useState("2021/04/01");
-  const [time, setTime] = useState("20:00");
-  const [game, setGame] = useState("splatoon2");
+  const [timeStart, setTimeStart] = useState("20:00");
+  const [timeEnd, setTimeEnd] = useState("22:00");
+  const [reminder1, setReminder1] = useState("12:30");
+  const [reminder2, setReminder2] = useState("19:30");
+  const [game, setGame] = useState("among_us");
   const games: { [key: string]: Game } = {
     among_us: {
       labelText: "Among Us",
@@ -71,6 +81,24 @@ function App() {
       channel: "麻雀",
     }
   }
+
+  const reminderText1 = `$natural
+${date} ${reminder1}
+ send
+@${games[game].role}
+本日 ${date} ${timeStart} ${games[game].labelText} をやります。よろしくお願いします
+ to #${games[game].channel}`
+  const reminderText2 = `$natural
+${date} ${reminder2}
+ send
+@${games[game].role}
+まもなく ${games[game].labelText} が始まります！時間になったら Gaming1 チャンネルで待機してください
+ to #${games[game].channel}`
+
+  const dtStart = new Date(`${date} ${timeStart}`)
+  const dtEnd = new Date(`${date} ${timeEnd}`)
+  const calenderUrl = encodeURI(`https://calendar.google.com/calendar/render?action=TEMPLATE&dates=${formatTime(dtStart)}/${formatTime(dtEnd)}&text=${games[game].labelText}&details=${games[game].labelText} をやります`)
+
   return (
     <div className="App">
       <Header aria-label="ゲーム部日程調整ツール">
@@ -80,7 +108,7 @@ function App() {
       </Header>
       <Content>
 
-        <Tile>
+        <Tile className="tile-input">
           <h1>日程選択</h1>
           <DatePicker
             datePickerType="single"
@@ -95,12 +123,6 @@ function App() {
               id="date-picker-single"
             />
           </DatePicker>
-          <TextInput
-            labelText="開始時刻"
-            id="text-input-time"
-            value={time}
-            onChange={event => setTime(event.target.value)} />
-
           <Select
             id="select-game"
             defaultValue={game}
@@ -111,21 +133,52 @@ function App() {
               Object.entries(games).map(([key, game]) => <SelectItem key={key} value={key} text={games[key].labelText} />)
             }
           </Select>
+          <Accordion>
+            <AccordionItem title="詳細設定">
+              <TextInput
+                labelText="開始時刻"
+                id="text-input-time-start"
+                value={timeStart}
+                type="time"
+                onChange={event => setTimeStart(event.target.value)} />
+              <TextInput
+                labelText="終了時刻"
+                id="text-input-time-end"
+                value={timeEnd}
+                type="time"
+                onChange={event => setTimeEnd(event.target.value)} />
+              <TextInput
+                labelText="リマインド1"
+                id="text-input-reminder2"
+                value={reminder1}
+                type="time"
+                onChange={event => setReminder1(event.target.value)} />
+              <TextInput
+                labelText="リマインド2"
+                id="text-input-reminder2"
+                value={reminder2}
+                type="time"
+                onChange={event => setReminder2(event.target.value)} />
+            </AccordionItem>
+          </Accordion>
+
         </Tile>
 
         <Tile>
           <div>
-            {date} {time} {games[game].labelText}
+            <TextArea
+              labelText="reminderText1"
+              rows={6}
+              value={reminderText1} />
+            <CopyButton onClick={() => copy(reminderText1)}/>
           </div>
           <div>
-            <pre>
-              $natural
-              {date} 12:30
-              send
-              @{games[game].role}
-              本日 {date} {time} {games[game].labelText} をやります。よろしくお願いします
-              to #{games[game].channel}
-            </pre>
+            <TextArea
+              labelText="reminderText2"
+              rows={6}
+              value={reminderText2} />
+            <CopyButton onClick={() => copy(reminderText2)}/>
+            <Button href={calenderUrl} target="_blank">Googleカレンダーに追加</Button>
           </div>
         </Tile>
       </Content>
