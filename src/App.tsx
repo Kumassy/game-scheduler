@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import logo from './logo.svg';
 import moment from "moment";
 import copy from 'copy-to-clipboard';
 import './App.css';
