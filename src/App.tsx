@@ -32,7 +32,7 @@ type Game = {
   channel: string,
 }
 function App() {
-  const [date, setDate] = useState("2021/04/01");
+  const [date, setDate] = useState(moment().format("YYYY/MM/DD"));
   const [timeStart, setTimeStart] = useState("20:00");
   const [timeEnd, setTimeEnd] = useState("22:00");
   const [reminder1, setReminder1] = useState("12:30");
@@ -42,6 +42,16 @@ function App() {
     among_us: {
       labelText: "Among Us",
       role: "AmongUs",
+      channel: "among-us",
+    },
+    among_us_beginner: {
+      labelText: "Among Us (かけだしクルーメイト)",
+      role: "AmongUs(かけだしクルーメイト)",
+      channel: "among-us",
+    },
+    among_us_advanced: {
+      labelText: "Among Us (いちにんまえクルーメイト)",
+      role: "AmongUs(いちにんまえクルーメイト)",
       channel: "among-us",
     },
     apex: {
@@ -93,6 +103,13 @@ ${date} ${reminder2}
 @${games[game].role}
 まもなく ${games[game].labelText} が始まります！時間になったら Gaming1 チャンネルで待機してください
  to #${games[game].channel}`
+
+  const pollText = `?poll
+@${games[game].role}
+"${date} ${timeStart} からの ${games[game].labelText} に参加しますか？"
+:o: 参加します
+:x: 参加しません
+:question: まだ調整中です`
 
   const dtStart = new Date(`${date} ${timeStart}`)
   const dtEnd = new Date(`${date} ${timeEnd}`)
@@ -147,13 +164,13 @@ ${date} ${reminder2}
                 type="time"
                 onChange={event => setTimeEnd(event.target.value)} />
               <TextInput
-                labelText="リマインド1"
+                labelText="リマインダ 昼"
                 id="text-input-reminder2"
                 value={reminder1}
                 type="time"
                 onChange={event => setReminder1(event.target.value)} />
               <TextInput
-                labelText="リマインド2"
+                labelText="リマインダ 夜"
                 id="text-input-reminder2"
                 value={reminder2}
                 type="time"
@@ -166,17 +183,26 @@ ${date} ${reminder2}
         <Tile>
           <div>
             <TextArea
-              labelText="reminderText1"
+              labelText="リマインダ 昼"
               rows={6}
               value={reminderText1} />
             <CopyButton onClick={() => copy(reminderText1)}/>
           </div>
           <div>
             <TextArea
-              labelText="reminderText2"
+              labelText="リマインダ 夜"
               rows={6}
               value={reminderText2} />
             <CopyButton onClick={() => copy(reminderText2)}/>
+          </div>
+          <div>
+            <TextArea
+              labelText="参加確認"
+              rows={6}
+              value={pollText} />
+            <CopyButton onClick={() => copy(pollText)}/>
+          </div>
+          <div>
             <Button href={calenderUrl} target="_blank">Googleカレンダーに追加</Button>
           </div>
         </Tile>
