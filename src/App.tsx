@@ -88,7 +88,12 @@ function App() {
       labelText: "麻雀",
       role: "麻雀",
       channel: "麻雀",
-    }
+    },
+    codenames: {
+      labelText: "コードネーム",
+      role: "コードネーム",
+      channel: "コードネーム",
+    },
   }
 
   const reminderText1 = `$natural
